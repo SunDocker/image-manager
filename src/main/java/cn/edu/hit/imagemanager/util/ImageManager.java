@@ -1,5 +1,8 @@
 package cn.edu.hit.imagemanager.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -9,6 +12,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ImageManager {
+
+    private final static Logger logger = LoggerFactory.getLogger(ImageManager.class);
+
     // 最大线程数
     // TODO ---------------------------------- for test ----------------------------------
     private static final int MAX_THREAD_NUM = 5;
@@ -27,7 +33,6 @@ public class ImageManager {
 
     // 存储已经下载过的image名称和下载完成的时间
     // 使用ConcurrentHashMap，允许并发访问，同时在这个场景下允许一定程度的数据不一致问题
-//    private static final Map<String, Long> loadedImages = new HashMap<>(LOADED_MAP_INIT_CAPACITY);
     private static final ConcurrentMap<String, Long> loadedImages = new ConcurrentHashMap<>(LOADED_MAP_INIT_CAPACITY);
 
     // 存储正在下载的image名称，其容量和最大线程数保持一致
@@ -85,7 +90,7 @@ public class ImageManager {
             String pipList = null;
             pipList = ShellExecutor.execWithResult(command);
             // TODO ---------------------------------- for test ----------------------------------
-            System.out.println(Thread.currentThread().getName() + "执行了一次拉取镜像" + imageName + "的command");
+            logger.info(Thread.currentThread().getName() + "执行了一次拉取镜像" + imageName + "的command");
             // 下载完成
             return pipList;
         });
@@ -153,7 +158,7 @@ public class ImageManager {
                     //String command = "docker rmi " + imageNameAndVersion;
                     String command = "echo " + outdatedImage + ':' + minTime;
                     String delResult = ShellExecutor.execWithResult(command);
-                    System.out.print("异步删除" + delResult + "  ");
+                    logger.info("异步删除" + delResult + "  ");
                 }
             }
             lockForDeleteImage.unlock();
