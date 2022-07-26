@@ -17,12 +17,12 @@ public class ImageManager {
 
     // 最大线程数
     // TODO ---------------------------------- for test ----------------------------------
-    private static final int MAX_THREAD_NUM = 5;
+    private static final int MAX_THREAD_NUM = 30;
 
     //最大镜像数
     // TODO ---------------------------------- for test ----------------------------------
-    //private static final int MAX_IMAGE_NUM = 50;
-    private static final int MAX_IMAGE_NUM = 3;
+    private static final int MAX_IMAGE_NUM = 100;
+//    private static final int MAX_IMAGE_NUM = 3;
 
     // HashMap加载因子
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
@@ -86,7 +86,7 @@ public class ImageManager {
             // TODO ---------------------------------- for test ----------------------------------
             //String command = "docker run --rm --entrypoint bash " + imageName + " python -m pip list --format=freeze";
             //String command = "choice /t 5 /d y /n >nul & echo testing!!!";
-            String command = "ping www.test.com";
+            String command = "ping -c 1 www.test.com";
             String pipList = null;
             pipList = ShellExecutor.execWithResult(command);
             // TODO ---------------------------------- for test ----------------------------------
