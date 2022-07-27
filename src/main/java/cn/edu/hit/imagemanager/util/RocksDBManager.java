@@ -9,7 +9,9 @@ import java.util.Objects;
 
 public class RocksDBManager {
     // 要提前创建好
+    // TODO for test
     private static final String DB_PATH = "/rocksdb/defaultCF";
+//    private static final String DB_PATH = "/home/ices/rocksdb/defaultCF";
 
 //    private static final String PIP_LIST_KEY = "pipList";
 

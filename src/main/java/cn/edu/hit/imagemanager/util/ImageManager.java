@@ -84,7 +84,7 @@ public class ImageManager {
             // 执行shell命令，开始下载image
             // 要执行的指令
             // TODO ---------------------------------- for test ----------------------------------
-            String command = "docker run --rm --entrypoint bash " + imageName + " python -m pip list --format=freeze";
+            String command = "docker run --rm --entrypoint bash " + imageName + " -c 'python -m pip list --format=freeze'";
 //            String command = "echo loadImage";
 //            String command = "ping -c 1 www.test.com";
             String pipList = ShellExecutor.execWithResult(command);
@@ -178,7 +178,7 @@ public class ImageManager {
                     String command = "docker rmi " + imageNameAndVersion;
 //                    String command = "echo " + outdatedImage + ':' + minTime;
                     String delResult = ShellExecutor.execWithResult(command);
-                    logger.info("异步删除" + delResult + "  ");
+                    logger.info("异步删除镜像：" + delResult);
                 }
             }
             lockForDeleteImage.unlock();
