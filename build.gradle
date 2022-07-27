@@ -8,7 +8,8 @@ plugins {
 
 group = 'cn.edu.hit'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '8'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 bootWar {
     archiveFileName = 'image.war'
@@ -16,14 +17,26 @@ bootWar {
 
 repositories {
     mavenLocal()
-    //这里要用https，不然会报错
-    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    maven {
+        allowInsecureProtocol = true
+        url = uri("http://10.249.181.72:8081/repository/maven-aliyun-com/repository/public")
+    }
+    maven {
+        allowInsecureProtocol = true
+        url = uri("http://10.249.181.72:8081/repository/maven-aliyun-com/repository/gradle-plugin")
+    }
+    maven {
+        url = uri("https://maven.aliyun.com/repository/public")
+    }
+    maven {
+        url = uri("https://maven.aliyun.com/repository/gradle-plugin")
+    }
     mavenCentral()
 }
 
 dependencies {
+    implementation 'org.jetbrains.pty4j:pty4j:0.12.7'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // https://mvnrepository.com/artifact/org.rocksdb/rocksdbjni
     implementation 'org.rocksdb:rocksdbjni:7.3.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

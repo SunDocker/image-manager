@@ -3,10 +3,7 @@ package cn.edu.hit.imagemanager.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -84,16 +81,20 @@ public class ImageManager {
             // 执行shell命令，开始下载image
             // 要执行的指令
             // TODO ---------------------------------- for test ----------------------------------
-            String command = "docker run --rm --entrypoint bash " + imageName + " -c 'python -m pip list --format=freeze'";
-//            String command = "echo loadImage";
-//            String command = "ping -c 1 www.test.com";
-            String pipList = ShellExecutor.execWithResult(command);
+            // String command = "docker run --rm --entrypoint bash " + imageName + " -c 'python -m pip list --format=freeze'";
+            // String command = "echo loadImage";
+            // String command = "ping -c 1 www.test.com";
+            String command = "docker run --rm --entrypoint bash \"$imageName\" -c 'python -m pip list --format=freeze'";
+            HashMap<String, String> env = new HashMap<>(1);
+            env.put("imageName", imageName);
+            String execResult = ShellExecutor.execWithEnvInLinux(command, env);
             // TODO ---------------------------------- for test ----------------------------------
             logger.info(Thread.currentThread().getName() + "执行了一次拉取镜像" + imageName + "的command");
             // 下载完成
-            return pipList;
+            return execResult;
         });
         String pipList = null;
+        boolean imageNotExist = false;
         try {
             // TODO 对命令返回值的处理
             String comResp = loadImageTask.get();
@@ -104,7 +105,9 @@ public class ImageManager {
                 String endDownload = "Status: Downloaded newer image for " + wholeImageName + "";
                 int idx = comResp.indexOf(endDownload);
                 if (idx == -1) {
+                    // 这种情况说明镜像不存在
                     pipList = comResp;
+                    imageNotExist = true;
                 } else {
                     // 只截取pip命令的返回结果
                     pipList = comResp.substring(idx + endDownload.length() + 1);
@@ -127,7 +130,9 @@ public class ImageManager {
             return e.getMessage();
         }
         // 2.更新loadedImages
-        loadedImages.put(imageName, System.currentTimeMillis());
+        if (!imageNotExist) {
+            loadedImages.put(imageName, System.currentTimeMillis());
+        }
         //上锁，防止相同请求多次下载
         lockForCheckLoad.lock();
         // 3.从loadingImages中移除
