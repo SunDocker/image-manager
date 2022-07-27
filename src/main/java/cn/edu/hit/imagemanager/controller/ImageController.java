@@ -14,4 +14,8 @@ public class ImageController {
         return ImageManager.loadImage(imageName);
     }
 
+    @GetMapping("test")
+    public String loadImage() {
+        return "test success !";
+    }
 }

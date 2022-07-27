@@ -131,9 +131,9 @@ public class HttpRequestSender {
                 isFirst = false;
             else
                 sb.append("&");
-            sb.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+            sb.append(URLEncoder.encode(entry.getKey()));
             sb.append("=");
-            sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+            sb.append(URLEncoder.encode(entry.getValue()));
         }
         return sb.toString();
     }

@@ -8,9 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class RocksDBManager {
-    private static final String DB_PATH = "rocksdb/defaultCF";
+    // 要提前创建好
+    private static final String DB_PATH = "/rocksdb/defaultCF";
 
-    private static final String PIP_LIST_KEY = "pipList";
+//    private static final String PIP_LIST_KEY = "pipList";
 
     private static final RocksDB rocksDB;
 
@@ -26,12 +27,12 @@ public class RocksDBManager {
         rocksDB = rocksDB0;
     }
 
-    public static void storePipList(String pipList) {
+    public static void storePipList(String pipKey, String pipList) {
         if (Objects.isNull(rocksDB)) {
             // TODO 如果出错了返回什么？？？
             throw new RuntimeException("rocksdb数据库初始化出错");
         }
-        byte[] key = PIP_LIST_KEY.getBytes(StandardCharsets.UTF_8);
+        byte[] key = pipKey.getBytes(StandardCharsets.UTF_8);
         byte[] value = pipList.getBytes(StandardCharsets.UTF_8);
         try {
             rocksDB.put(key, value);
@@ -42,12 +43,12 @@ public class RocksDBManager {
         }
     }
 
-    public static String readPipList() {
+    public static String readPipList(String pipKey) {
         if (Objects.isNull(rocksDB)) {
             // TODO 如果出错了返回什么？？？
             throw new RuntimeException("rocksdb数据库初始化出错");
         }
-        byte[] key = PIP_LIST_KEY.getBytes(StandardCharsets.UTF_8);
+        byte[] key = pipKey.getBytes(StandardCharsets.UTF_8);
         byte[] value = null;
         try {
             value = rocksDB.get(key);

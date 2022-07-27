@@ -2,11 +2,17 @@ plugins {
     id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
     id 'java'
+    id 'war'
 }
+
 
 group = 'cn.edu.hit'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '8'
+
+bootWar {
+    archiveFileName = 'image.war'
+}
 
 repositories {
     mavenLocal()

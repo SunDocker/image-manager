@@ -55,7 +55,7 @@ public class ImageManager {
             // 更新时间
             loadedImages.put(imageName, System.currentTimeMillis());
             lockForCheckLoad.unlock();
-            return RocksDBManager.readPipList();
+            return RocksDBManager.readPipList(imageName);
         }
         // 没有相同的，则继续向下执行
 
@@ -72,7 +72,7 @@ public class ImageManager {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                return RocksDBManager.readPipList();
+                return RocksDBManager.readPipList(imageName);
             }
         }
         // 不在下载过程中，则标记为正在下载中
@@ -84,11 +84,10 @@ public class ImageManager {
             // 执行shell命令，开始下载image
             // 要执行的指令
             // TODO ---------------------------------- for test ----------------------------------
-            //String command = "docker run --rm --entrypoint bash " + imageName + " python -m pip list --format=freeze";
-            //String command = "choice /t 5 /d y /n >nul & echo testing!!!";
-            String command = "ping -c 1 www.test.com";
-            String pipList = null;
-            pipList = ShellExecutor.execWithResult(command);
+            String command = "docker run --rm --entrypoint bash " + imageName + " python -m pip list --format=freeze";
+//            String command = "echo loadImage";
+//            String command = "ping -c 1 www.test.com";
+            String pipList = ShellExecutor.execWithResult(command);
             // TODO ---------------------------------- for test ----------------------------------
             logger.info(Thread.currentThread().getName() + "执行了一次拉取镜像" + imageName + "的command");
             // 下载完成
@@ -96,7 +95,23 @@ public class ImageManager {
         });
         String pipList = null;
         try {
-            pipList = loadImageTask.get();
+            // TODO 对命令返回值的处理
+            String comResp = loadImageTask.get();
+            // 通过返回值判断是否拉取了镜像，过滤掉拉取镜像指令的返回值，只保留pip的执行返回值
+            String wholeImageName = imageName.indexOf(':') != -1 ? imageName : imageName + ":latest";
+            String beginDownload = "Unable to find image '" + wholeImageName + "' locally";
+            if (comResp.indexOf(beginDownload) == 0) {
+                String endDownload = "Status: Downloaded newer image for " + wholeImageName + "";
+                int idx = comResp.indexOf(endDownload);
+                if (idx == -1) {
+                    pipList = comResp;
+                } else {
+                    // 只截取pip命令的返回结果
+                    pipList = comResp.substring(idx + endDownload.length() + 1);
+                }
+            } else {
+                pipList = comResp;
+            }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             // TODO 如果出错了返回什么？？？
@@ -105,7 +120,12 @@ public class ImageManager {
 
         // 注：下面这四步的顺序对于并发的相同请求来说很重要
         // 1.将新的执行结果保存到rocksdb中
-        RocksDBManager.storePipList(pipList);
+        // TODO ---------------------------------- for test ----------------------------------
+        try {
+            RocksDBManager.storePipList(imageName, pipList);
+        } catch (Exception e) {
+            return e.getMessage();
+        }
         // 2.更新loadedImages
         loadedImages.put(imageName, System.currentTimeMillis());
         //上锁，防止相同请求多次下载
@@ -155,8 +175,8 @@ public class ImageManager {
                     String[] splitImage = outdatedImage.split("/");
                     String imageNameAndVersion = splitImage[splitImage.length - 1];
                     // TODO ---------------------------------- for test ----------------------------------
-                    //String command = "docker rmi " + imageNameAndVersion;
-                    String command = "echo " + outdatedImage + ':' + minTime;
+                    String command = "docker rmi " + imageNameAndVersion;
+//                    String command = "echo " + outdatedImage + ':' + minTime;
                     String delResult = ShellExecutor.execWithResult(command);
                     logger.info("异步删除" + delResult + "  ");
                 }
