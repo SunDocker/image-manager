@@ -44,6 +44,7 @@ public class ImageManager {
     private static final Lock lockForDeleteImage = new ReentrantLock();
 
     public static String loadImage(String imageName) {
+        logger.info("image name : " + imageName);
         // 上锁，防止高并发时相同请求下载多次
         lockForCheckLoad.lock();
         // 检查loadedImage，确定之前是否已经下载过相同image
